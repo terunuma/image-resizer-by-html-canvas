@@ -190,6 +190,7 @@ canvas {
           xhr.open('GET', data)
           xhr.responseType = 'blob'
           xhr.onload = function() {
+            alert('safari')
             const blob = xhr.response
             const url = (window.URL || window.webkitURL).createObjectUrl(blob)
             location.href = url
