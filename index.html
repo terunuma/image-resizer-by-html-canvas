@@ -177,9 +177,7 @@ canvas {
     const downloadLinkElems = document.querySelectorAll('.download')
     if (!downloadLinkElems.length) return
 
-    const _global = window
-    const isSafari = /constructor/i.test(_global.HTMLElement) || _global.safari
-    if (isSafari) alert('safari')
+    const isSafari = /constructor/i.test(window.HTMLElement) || window.safari
 
     downloadLinkElems.forEach(elem => {
       elem.addEventListener('click', event => {
@@ -193,8 +191,7 @@ canvas {
           xhr.responseType = 'blob'
           xhr.onload = function() {
             const blob = xhr.response
-            const URL = (_global.URL || _global.webkitURL)
-            const url = URL.createObjectUrl(blob)
+            const url = (window.URL || window.webkitURL).createObjectURL(blob)
             location.href = url
           }
           xhr.send()
