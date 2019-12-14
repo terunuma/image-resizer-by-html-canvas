@@ -193,7 +193,8 @@ canvas {
           xhr.responseType = 'blob'
           xhr.onload = function() {
             const blob = xhr.response
-            const url = (_global.URL || _global.webkitURL).createObjectUrl(blob)
+            const URL = (_global.URL || _global.webkitURL)
+            const url = URL.createObjectUrl(blob)
             location.href = url
           }
           xhr.send()
