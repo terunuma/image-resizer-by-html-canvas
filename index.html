@@ -177,14 +177,29 @@ canvas {
     const downloadLinkElems = document.querySelectorAll('.download')
     if (!downloadLinkElems.length) return
 
+    const isSafari = /constructor/i.test(window.HTMLElement) || window.safari
+
     downloadLinkElems.forEach(elem => {
       elem.addEventListener('click', event => {
         const canvasElem = elem.parentNode.querySelector('canvas')
         if (!canvasElem) return
+        const data = canvasElem.toDataURL('image/png')
 
-        console.dir(canvasElem)
+        if (isSafari) {
+          const xhr = new XMLHttpRequest()
+          xhr.open('GET', data)
+          xhr.responseType = 'blob'
+          xhr.onload = function() {
+            const blob = xhr.response
+            const url = (window.URL || window.webkitURL).createObjectUrl(blob)
+            location.href = url
+          }
+          xhr.send()
+          return
+        }
+
         const link = document.createElement('a')
-        link.href = canvasElem.toDataURL('image/png')
+        link.href = data
         link.download = (canvasElem.className)
           ? `image-${canvasElem.className}.png`
           : 'image.png'
