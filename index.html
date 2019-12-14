@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>画像リサイズ with HTML canvas (PWA)</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="ImgResize">
+  <link rel="apple-touch-icon" href="assets/images/icons/icon-152x152.png">
+</head>
+<body>
+  <h1>画像リサイズ with HTML canvas (PWA)</h1>
+  <h2>1. 画像をアップロード</h2>
+  <input type="file" name="image">
+  <h2>2. 画像サイズを調整</h2>
+  <div class="images">
+    <div>
+      <h3>16</h3>
+      <canvas class="size16"></canvas>
+    </div>
+    <div>
+      <h3>32</h3>
+      <canvas class="size32"></canvas>
+    </div>
+    <div>
+      <h3>64</h3>
+      <canvas class="size64"></canvas>
+    </div>
+  </div>
+  <div class="images">
+    <div>
+      <h3>128</h3>
+      <canvas class="size128"></canvas>
+    </div>
+    <div>
+      <h3>256</h3>
+      <canvas class="size256"></canvas>
+    </div>
+  </div>
+  <h3>512</h3>
+  <canvas class="size512"></canvas>
+  <h3>1024</h3>
+  <canvas class="size1024"></canvas>
+  <h3>custom</h3>
+  <canvas class="manual"></canvas>
+  <div>
+    <span>width:</span>
+    <input type="number" name="width" value="0">
+    <span>height:</span>
+    <input type="number" name="height" value="0">
+  </div>
+  <canvas class="sizeManual"></canvas>
+  <h2>3. 画像をダウンロード</h2>
+  <p>画像をタップ長押ししてダウンロードしてください 💡</p>
+
+<style type="text/css">
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+}
+.images {
+  display: flex;
+}
+.images > div:not(:first-child) {
+  padding-left: 10px;
+}
+</style>
+
+<script type="text/javascript">
+;(function() {
+  const canvasElems = {
+    '16': document.querySelector('canvas.size16'),
+    '32': document.querySelector('canvas.size32'),
+    '64': document.querySelector('canvas.size64'),
+    '128': document.querySelector('canvas.size128'),
+    '256': document.querySelector('canvas.size256'),
+    '512': document.querySelector('canvas.size512'),
+    '1024': document.querySelector('canvas.size1024'),
+    'manual': document.querySelector('canvas.manual')
+  }
+  const widthElem = document.querySelector('input[name="width"]')
+  const heightElem = document.querySelector('input[name="height"]')
+
+  let currentImage = {
+    element: null,
+    width: 0,
+    height: 0
+  }
+
+  function updateImage(image, width, height) {
+    currentImage.element = image
+    currentImage.width = width
+    currentImage.height = height
+
+    function updateOne(canvasElem, width, height) {
+      const context = canvasElem.getContext('2d')
+      context.clearRect(0, 0, currentImage.width, currentImage.height)
+      canvasElem.width = width
+      canvasElem.height = height
+      context.drawImage(
+        image,
+        0, 0, image.width, image.height,
+        0, 0, width, height
+      )
+    }
+
+    for (const size in canvasElems) {
+      updateOne(
+        canvasElems[size],
+        (size !== 'manual') ? size : currentImage.width,
+        (size !== 'manual') ? size : currentImage.height
+      )
+    }
+  }
+
+  function reloadCurrentImage() {
+    updateImage(currentImage.element, currentImage.width, currentImage.height)
+  }
+
+  function drawImageToCanvas(src) {
+    const image = new Image()
+    image.src = src
+    image.addEventListener('load', () => {
+      widthElem.value = 128
+      heightElem.value = 128
+      updateImage(image, 128, 128)
+    })
+  }
+
+  function loadDefaultImageToCanvas() {
+    drawImageToCanvas('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAFX0lEQVR4Xu3dO08qURSG4Y2JEiWRhJLCysrExP//G7CwNYiVxorEGDREIyeDB68Mc1trr29drDxHmNl7vQ8DVNObTCar0WiU+v1+ih8/E1gul2k+n6febDZbFb+cnp6m4XDoZwKOd/r4+Jim02kqXvi9u7u71WAwWP9HILCvYhO/aL1YLD4AjMfj9P0PcSWwCeF34/v7+y8AxZYDgc3wZW3/AAgENgGUvbC3AggEthDsuqqXAggENhBUvaXvBBAIdCOoil/srhJAINCJoE782gACgS4EdeM3AhAIdCBoEr8xgECAjaBp/FYAAgEmgjbxWwMIBFgI2sbvBCAQYCDoEr8zgEAgi6BrfBIAgUAGAUV8MgCBIC8CqvikAAJBHgSU8ckBBAJeBNTxWQAEAh4EHPHZAAQCWgRc8VkBBAIaBJzx2QEEgm4IuONnARAI2iHIET8bgEDQDEGu+FkBBIJ6CHLGzw4gEOxGkDu+CIBAsB2BRHwxAIHgJwKp+KIAAsEHAsn44gAQBlDvoxnPo6TjQwDwigAhPgwAbwhQ4kMB8IIAKT4cAOsI0OJDArCKADE+LABrCFDjQwOwggA5PjwA7QjQ46sAoBWBhvhqAGhDoCW+KgBaEGiKrw4AOgJt8VUCQEWgMb5aAGgItMZXDQAFgeb46gFII9Ae3wQAKQQW4psBkBuBlfimAORCYCm+OQDcCKzFNwmAC4HF+GYBUCOwGt80ACoEluObB9AVgfX4LgC0ReAhvhsATRF4ie8KQF0EnuK7A1CFwFt8lwDKEHiM7xbAbwTFv73eN7nWXcOKAVn82bzqi715vWl2AJhO17YDwHhs8UVeuqfv7/nxFvD/9vFeBGz7wBcfAp1cAXaF9ojA1WeAOoHrPMbSldINgCZhmzxWOwYXANoEbfMcjRjMA+gSsstztWAwDYAiIMUxkDGYBUAZjvJYaBhMAuAIxnFMBAzmAHCG4jy2FAZTAHIEynGOnBjMAMgZJue5uDGYACARROKcHBjUA5AMIXluKgyqASAEQFhDFwxqASANHmktTTGoBIA4cMQ11cGgDgDyoJHXVoZBFQANA9awxu8Y1ADQNFhNa1UBQNNAN68uLWuGB6BlkNveYzWsHRqAhgFWfdJG3wMsAPTBVYX//nfkvUACQB5Yk/AaEMABsBgf+YMhFADL8VERwADwEB8RAQQAT/HREIgD8BgfCYEoAM/xURCIAYj4X18SJWchAkByw22/x3M/T2om2QFIbZQ7IMXxJWaTFYDEBinC5DxG7hllA5B7YzmjUZ8r56yyAMi5IeoYUsfLNTN2ALk2IhWK87w5ZscKIMcGOAMgHJt7hmwAuBeOECfXGjhnyQKAc8G5ho52Hq6ZkgPgWihaEIn1cMyWFADHAiUGjXxO6hmTAaBeGHIE6bVRzpoEAOWCpIer5fxUM+8MgGohWgaPtE6K2XcCQLEApIFqXEvXBq0BdD2xxmGjrrlLi1YAupwQdYja19W2SWMAbU+kfcAa1t+mTSMAbU6gYXCW1vj8/Jxubm7SyclJGg6HlVurDSDiV84S6gEPDw/p8PCwEkEtABEfqm3txVxeXqazs7M1hLKfSgARv/a84R5YvB28vb2l4+PjdgAiPlzTxgsqEBwdHaX39/e0t7f35/mlV4CI33jWKp+wFUDEV9ly56Kfnp7S9fV1Oj8/TwcHB5+P/QMg4tuLv9lR0fb29jZdXFxsBxDx7cbf7Oz19TXt7++nl5eX9beDzyvAYDBwewt1+9l/7rD4ZnB1dbW+YfZisUi92Wy2ms/nbu+g7Q1Asd/N1X40GqXeZDJZFb/0+32Ps3C75+VymYoX/j/LXBVI7lcwQwAAAABJRU5ErkJggg==')
+  }
+
+  ;(() => {
+    function updateWidth(event) {
+      currentImage.width = event.target.value
+      reloadCurrentImage()
+    }
+    function updateHeight(event) {
+      currentImage.height = event.target.value
+      reloadCurrentImage()
+    }
+    widthElem.addEventListener('change', updateWidth)
+    heightElem.addEventListener('change', updateHeight)
+  })()
+
+  ;(() => {
+    const inputElem = document.querySelector('[name="image"]')
+    inputElem.addEventListener('change', event => {
+      const file = (event.target.files && event.target.files[0])
+        ? event.target.files[0]
+        : null
+      if (!file) return
+      if (!file.type.match('image.*')) return
+
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.addEventListener('loadend', event => {
+        src = event.target.result
+        if (!src) return
+        drawImageToCanvas(src)
+      })
+    })
+  })()
+
+  loadDefaultImageToCanvas()
+
+})()
+</script>
+</body>
+</html>
