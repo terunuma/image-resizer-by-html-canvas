@@ -178,6 +178,7 @@ canvas {
     if (!downloadLinkElems.length) return
 
     const isSafari = /constructor/i.test(window.HTMLElement) || window.safari
+    if (isSafari) alert('safari')
 
     downloadLinkElems.forEach(elem => {
       elem.addEventListener('click', event => {
