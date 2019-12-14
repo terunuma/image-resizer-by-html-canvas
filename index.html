@@ -191,12 +191,13 @@ canvas {
           : 'image.png'
         if (isSafari) {
           const blob = new Blob([data], { type: 'application/octet-stream' })
-          link.href = window.URL.createObjectURL(blob)
-          link.target = '_blank'
+          // link.href = window.URL.createObjectURL(blob)
+          // link.target = '_blank'
+          location.href = window.URL.createObjectURL(blob)
         } else {
           link.href = data
+          link.click()
         }
-        link.click()
       })
     })
   })()
