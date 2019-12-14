@@ -185,12 +185,16 @@ canvas {
         if (!canvasElem) return
 
         const link = document.createElement('a')
-        link.href = canvasElem.toDataURL('image/png')
+        const data = canvasElem.toDataURL('image/png')
         link.download = (canvasElem.className)
           ? `image-${canvasElem.className}.png`
           : 'image.png'
         if (isSafari) {
+          const blob = new Blob([data], { type: 'image/png' })
+          link.href = window.URL.createObjectURL(blob)
           link.target = '_blank'
+        } else {
+          link.href = data
         }
         link.click()
       })
