@@ -183,26 +183,15 @@ canvas {
       elem.addEventListener('click', event => {
         const canvasElem = elem.parentNode.querySelector('canvas')
         if (!canvasElem) return
-        const data = canvasElem.toDataURL('image/png')
-
-        if (isSafari) {
-          const xhr = new XMLHttpRequest()
-          xhr.open('GET', data)
-          xhr.responseType = 'blob'
-          xhr.onload = function() {
-            const blob = xhr.response
-            const url = (window.URL || window.webkitURL).createObjectURL(blob)
-            location.href = url
-          }
-          xhr.send()
-          return
-        }
 
         const link = document.createElement('a')
-        link.href = data
+        link.href = canvasElem.toDataURL('image/png')
         link.download = (canvasElem.className)
           ? `image-${canvasElem.className}.png`
           : 'image.png'
+        if (isSafari) {
+          link.target = '_blank'
+        }
         link.click()
       })
     })
